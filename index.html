@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#23262B">
+<title>The Complicator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=JetBrains+Mono:wght@700;800&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#23262B;--ink:#E9E6DF;--muted:#AEB4BC;--edge:#0E0F11;--chip:#33373E;
+  --accent:#F2994A;--accent-ink:#151515;
+  --pip:#FFE3C7;--pip-ink:#151515;--pip-sub:#5A3A1C;
+  --lcd:#DDE8C9;--lcd-ink:#142010;
+  --num:#F4F1EA;--op:#4A505A;--del:#B9302A;
+  --ghost:#3A3F47;--todo:#5B6470;--done:#CFE8C0;--done-ink:#14260E;
+  --f-ui:'Space Grotesk',system-ui,sans-serif;--f-num:'JetBrains Mono',ui-monospace,monospace;
+  --s:1;
+}
+.calm{--bg:#2A2C30;--accent:#C9A27E;--pip:#ECE4D8;--pip-sub:#5C4A38;--lcd:#DCE0D6;--del:#8E4A46;--done:#D6E0CF;--op:#50555D}
+.easy{--f-ui:'Atkinson Hyperlegible',system-ui,sans-serif;--f-num:'Atkinson Hyperlegible',system-ui,sans-serif}
+.big{--s:1.18}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);overscroll-behavior:none}
+body{font-family:var(--f-ui);color:var(--ink);-webkit-user-select:none;user-select:none;touch-action:manipulation}
+button{font-family:inherit;cursor:pointer}
+button:focus-visible{outline:3px solid #7FB2FF;outline-offset:2px}
+.app{height:100vh;height:100dvh;max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:10px;
+  padding:calc(12px + env(safe-area-inset-top)) calc(14px + env(safe-area-inset-right)) calc(12px + env(safe-area-inset-bottom)) calc(14px + env(safe-area-inset-left))}
+/* top */
+.top{display:flex;align-items:center;gap:8px}
+.brand{font-size:clamp(15px,4.6vw,20px);font-weight:700;letter-spacing:.03em;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chip{flex:none;font:800 12px var(--f-num);color:var(--ink);background:var(--chip);border:2px solid var(--edge);border-radius:999px;padding:6px 10px;white-space:nowrap}
+.chip b{color:var(--accent)}
+.icon-btn{flex:none;width:44px;height:44px;border-radius:14px;border:3px solid var(--edge);background:var(--chip);color:var(--ink);display:grid;place-items:center;padding:0}
+/* lanes */
+.lanes{display:flex;gap:8px}
+.lane{flex:1;height:48px;border-radius:14px;border:3px solid var(--edge);background:var(--chip);color:var(--ink);display:flex;flex-direction:column;justify-content:center;align-items:flex-start;padding:0 10px;gap:4px;text-align:left}
+.lane .ln{font-size:15px;font-weight:700;display:flex;gap:6px;align-items:center;width:100%}
+.lane .ln i{font-style:normal;font-family:var(--f-num);font-size:11px;color:var(--muted);margin-left:auto}
+.lane.on{background:var(--accent);color:var(--accent-ink)}
+.lane.on .ln i{color:var(--accent-ink)}
+.bar{height:5px;width:100%;background:rgba(0,0,0,.35);border-radius:3px;overflow:hidden}
+.bar span{display:block;height:100%;background:#9BD27E}
+.lane.on .bar span{background:var(--accent-ink)}
+/* screens */
+.screens{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden}
+.upper{flex:none;display:flex;gap:10px;align-items:flex-end;margin-bottom:-18px;position:relative;z-index:2}
+.stack{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px;padding-left:6px;padding-bottom:26px}
+.stack-h{font:800 11px var(--f-num);color:var(--muted);letter-spacing:.08em;margin-bottom:2px}
+.slab{height:var(--slab,24px);border:2px solid var(--edge);border-radius:4px;transform:skewX(-14deg);display:flex;align-items:center;padding:0 8px;box-shadow:0 3px 0 var(--edge);font:700 calc(var(--slabf,12px)*var(--s)) var(--f-num)}
+.slab span{transform:skewX(14deg);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ghost{background:var(--ghost);color:#C9CDD3}.todo{background:var(--todo);color:#fff}.now{background:var(--pip);color:var(--pip-ink)}.done{background:var(--done);color:var(--done-ink)}
+.pip{width:50%;max-width:240px;background:var(--pip);color:var(--pip-ink);border:3px solid var(--edge);border-radius:18px;box-shadow:0 8px 0 var(--edge);padding:12px;display:flex;flex-direction:column;gap:6px;transition:transform .15s}
+.pip-t{font-size:11px;font-weight:700;letter-spacing:.1em;color:var(--pip-sub)}
+.pip-m{font:800 calc(clamp(22px,7vw,30px)*var(--s))/1.1 var(--f-num);word-break:break-word}
+.pip-n{font-size:calc(13px*var(--s));line-height:1.3;color:var(--pip-sub);min-height:34px}
+.pip.shake{animation:shake .3s}
+@keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.main{flex:none;position:relative;z-index:1;background:var(--lcd);color:var(--lcd-ink);border:3px solid var(--edge);border-radius:20px;box-shadow:0 8px 0 var(--edge);padding:12px 16px;height:clamp(100px,14dvh,136px);display:flex;flex-direction:column;justify-content:space-between;margin-bottom:8px;overflow:hidden}
+.main-l{font:800 calc(13px*var(--s)) var(--f-num);letter-spacing:.04em;max-width:48%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.main-d{font:800 calc(clamp(42px,13vw,62px)*var(--s))/1 var(--f-num);text-align:right;white-space:nowrap;overflow:hidden}
+.main-d.empty::after{content:'';display:inline-block;width:.08em;height:.8em;background:currentColor;vertical-align:-.05em;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.focus .upper{margin-bottom:12px}
+.main.win{animation:pop .5s}
+@keyframes pop{40%{transform:scale(1.04)}}
+.spark{position:absolute;width:10px;height:10px;border-radius:2px;pointer-events:none;animation:fly .9s ease-out forwards}
+@keyframes fly{from{opacity:1;transform:translate(0,0) rotate(0)}to{opacity:0;transform:translate(var(--dx),var(--dy)) rotate(260deg)}}
+/* focus view */
+.focus .stack,.focus .lanes,.tight .stack{display:none}
+.tight .pip{width:100%;max-width:none}
+.focus .upper{justify-content:center}
+.focus .pip{width:100%;max-width:none;padding:16px}
+.focus .pip-m{font-size:calc(clamp(30px,10vw,44px)*var(--s))}
+.focus .screens{justify-content:center}
+/* actions */
+.actions{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.act{height:44px;border-radius:12px;border:2px solid var(--edge);background:var(--chip);color:var(--ink);font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px;padding:0 4px}
+.act[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.act:disabled{opacity:.4}
+/* keys */
+.keys{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.k{height:clamp(54px,8.6dvh,82px);border:0;border-radius:18px;font:700 clamp(28px,8vw,36px) var(--f-ui);box-shadow:0 6px 0 rgba(0,0,0,.45);display:grid;place-items:center}
+.k:active{transform:translateY(4px);box-shadow:0 2px 0 rgba(0,0,0,.45)}
+.num{background:var(--num);color:#151515}.op{background:var(--op);color:#fff}.eq{background:var(--accent);color:var(--accent-ink)}.del{background:var(--del);color:#fff}
+/* sheets */
+.veil{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:flex-end;justify-content:center;z-index:10}
+.veil.open{display:flex}
+.sheet{width:100%;max-width:560px;max-height:88dvh;overflow:auto;background:#2E3238;border-top:3px solid var(--edge);border-radius:22px 22px 0 0;padding:18px 18px calc(18px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:14px}
+.sheet h2{margin:0;font-size:20px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:44px}
+.row .lbl{font-size:16px;font-weight:700}
+.row .sub{font-size:13px;color:var(--muted);font-weight:400;margin-top:2px}
+.seg{display:flex;gap:6px}
+.seg button{min-width:52px;height:40px;border-radius:10px;border:2px solid var(--edge);background:var(--chip);color:var(--ink);font-weight:700;font-size:14px}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.tog{width:58px;height:34px;border-radius:999px;border:2px solid var(--edge);background:#4A505A;position:relative;flex:none}
+.tog::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:left .15s}
+.tog[aria-checked="true"]{background:#5FA84A}
+.tog[aria-checked="true"]::after{left:27px}
+.done-btn{height:50px;border-radius:14px;border:3px solid var(--edge);background:var(--accent);color:var(--accent-ink);font-size:17px;font-weight:700}
+.card{width:calc(100% - 28px);max-width:420px;margin:auto;background:#2E3238;border:3px solid var(--edge);border-radius:22px;padding:22px;display:flex;flex-direction:column;gap:14px;text-align:center}
+.card h2{margin:0;font-size:22px}
+.card p{margin:0;color:var(--muted);font-size:15px;line-height:1.4}
+.timer{font:800 56px var(--f-num);color:var(--ink)}
+.ghost-btn{height:50px;border-radius:14px;border:3px solid var(--edge);background:var(--chip);color:var(--ink);font-size:16px;font-weight:700}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+@media (max-height:700px){.k{height:clamp(46px,7.4dvh,60px)}.main{height:88px}.pip-n{min-height:0}}
+@media (max-height:640px){.lane{height:40px}.lane .bar{display:none}.stack-h{display:none}.act{height:38px}.main{height:92px}.brand{font-size:17px}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+.calm *{animation:none!important}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <div class="top">
+    <div class="brand">THE COMPLICATOR</div>
+    <div class="chip" id="stats" aria-live="off"></div>
+    <button class="icon-btn" id="openSettings" aria-label="Settings">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>
+    </button>
+  </div>
+  <div class="lanes" id="lanes" role="tablist" aria-label="Puzzles"></div>
+  <div class="screens">
+    <div class="upper">
+      <div class="stack"><div class="stack-h" id="stackH">DIMENSION STACK</div><div id="slabs" style="display:flex;flex-direction:column;gap:4px"></div></div>
+      <div class="pip" id="pip"><div class="pip-t" id="pipT"></div><div class="pip-m" id="pipM"></div><div class="pip-n" id="pipN"></div></div>
+    </div>
+    <div class="main" id="main"><div class="main-l" id="mainL"></div><div class="main-d" id="mainD"></div></div>
+  </div>
+  <div class="actions">
+    <button class="act" id="aHint">Hint</button>
+    <button class="act" id="aRoute">New way</button>
+    <button class="act" id="aSurprise">Surprise</button>
+    <button class="act" id="aFocus" aria-pressed="false">Focus</button>
+  </div>
+  <div class="keys" id="keys"></div>
+  <div class="sr" aria-live="polite" id="live"></div>
+</div>
+
+<div class="veil" id="settingsVeil" role="dialog" aria-modal="true" aria-labelledby="setH">
+  <div class="sheet">
+    <h2 id="setH">Make it yours</h2>
+    <div class="row"><div><div class="lbl">How complicated</div><div class="sub">Steps per puzzle</div></div><div class="seg" id="segLevel"></div></div>
+    <div class="row"><div><div class="lbl">Flow mode</div><div class="sub">Next puzzle loads by itself. Stay locked in.</div></div><button class="tog" role="switch" data-set="flow" aria-label="Flow mode"></button></div>
+    <div class="row"><div><div class="lbl">Focus view</div><div class="sub">Just the step you're on, nothing else</div></div><button class="tog" role="switch" data-set="focus" aria-label="Focus view"></button></div>
+    <div class="row"><div><div class="lbl">Calm colours</div><div class="sub">Softer, no wiggles or sparks</div></div><button class="tog" role="switch" data-set="calm" aria-label="Calm colours"></button></div>
+    <div class="row"><div><div class="lbl">Bigger text</div></div><button class="tog" role="switch" data-set="big" aria-label="Bigger text"></button></div>
+    <div class="row"><div><div class="lbl">Easy-read font</div><div class="sub">Clearer number shapes</div></div><button class="tog" role="switch" data-set="easy" aria-label="Easy-read font"></button></div>
+    <div class="row"><div><div class="lbl">Buzz when right</div><div class="sub">Phones that support it</div></div><button class="tog" role="switch" data-set="buzz" aria-label="Buzz when right"></button></div>
+    <div class="row"><div><div class="lbl">Read steps out loud</div></div><button class="tog" role="switch" data-set="speak" aria-label="Read steps out loud"></button></div>
+    <div class="row"><div><div class="lbl">Break nudge</div><div class="sub">A gentle tap after this long</div></div><div class="seg" id="segBreak"></div></div>
+    <button class="done-btn" id="closeSettings">Done</button>
+  </div>
+</div>
+
+<div class="veil" id="breakVeil" role="dialog" aria-modal="true" aria-labelledby="brH" style="align-items:center">
+  <div class="card" id="breakCard">
+    <h2 id="brH"></h2>
+    <p id="brP"></p>
+    <div class="timer" id="brTimer" hidden></div>
+    <button class="done-btn" id="brMain"></button>
+    <button class="ghost-btn" id="brAlt"></button>
+  </div>
+</div>
+
+<script>
+var LEVELS=[{name:'2D',n:2},{name:'4D',n:4},{name:'8D',n:8}];
+var KEYS=['7','8','9','÷','4','5','6','×','1','2','3','−','⌫','0','=','+'];
+var ARIA={'÷':'divide','×':'times','−':'minus','+':'plus','=':'equals','⌫':'delete'};
+var SAY={'+':'plus','−':'minus','×':'times','÷':'divided by'};
+var LANE_NAMES=['A','B','C'];
+var PRAISE=['Nice.','Locked in.','Clean.','Yes.','Smooth.','On it.','Easy work.'];
+function rnd(a,b){return a+Math.floor(Math.random()*(b-a+1))}
+function pick(a){return a[Math.floor(Math.random()*a.length)]}
+function isOp(c){return c==='+'||c==='−'||c==='×'||c==='÷'}
+function calc(a,op,b){return op==='+'?a+b:op==='−'?a-b:op==='×'?a*b:a/b}
+function evaluate(expr){
+  var p=expr.split(/([+−×÷])/).filter(function(x){return x!==''});
+  if(!p.length||isOp(p[p.length-1])||isOp(p[0]))return null;
+  var nums=[Number(p[0])],ops=[];
+  for(var i=1;i<p.length;i+=2){var op=p[i],b=Number(p[i+1]);
+    if(op==='×'||op==='÷'){if(op==='÷'&&b===0)return null;nums[nums.length-1]=calc(nums[nums.length-1],op,b)}
+    else{ops.push(op);nums.push(b)}}
+  var r=nums[0];for(var j=0;j<ops.length;j++)r=calc(r,ops[j],nums[j+1]);
+  return Math.round(r*1e9)/1e9;
+}
+function generate(target,n){
+  var s=rnd(3,15),steps=[];
+  for(var i=0;i<n-1;i++){var r=Math.random(),op,b;
+    if(s>0&&s<=10&&r<0.25){op='×';b=rnd(2,3)}
+    else if(s>=4&&s%2===0&&r<0.4){op='÷';b=2}
+    else if(r<0.7||s<3){op='+';b=rnd(2,12)}
+    else{op='−';b=rnd(1,Math.min(s-1,12))}
+    var res=calc(s,op,b);steps.push({a:s,op:op,b:b,res:res});s=res}
+  if(target>s)steps.push({a:s,op:'+',b:target-s,res:target});
+  else if(target<s)steps.push({a:s,op:'−',b:s-target,res:target});
+  else steps.push({a:s,op:'×',b:1,res:target});
+  return steps;
+}
+function surpriseSum(){
+  var t=rnd(0,3);
+  if(t===0){var a=rnd(1,12),b=rnd(1,12);return a+'+'+b}
+  if(t===1){var a2=rnd(5,20),b2=rnd(1,a2);return a2+'−'+b2}
+  if(t===2){return rnd(2,5)+'×'+rnd(2,5)}
+  var d=rnd(2,5);return (d*rnd(2,6))+'÷'+d;
+}
+function hintFor(s){
+  var a=s.a,b=s.b;
+  if(s.op==='+'){if(b>=10&&b%10!==0)return 'Split it: '+fmt(a)+' + '+(b-b%10)+' = '+fmt(a+b-b%10)+', then + '+(b%10)+'.';
+    return 'Start at '+fmt(a)+' and count up '+b+'.'}
+  if(s.op==='−'){if(b>=10&&b%10!==0)return 'Split it: '+fmt(a)+' − '+(b-b%10)+' = '+fmt(a-(b-b%10))+', then − '+(b%10)+'.';
+    return 'Start at '+fmt(a)+' and count back '+b+'.'}
+  if(s.op==='×'){if(b===1)return 'Times 1 changes nothing. It stays '+fmt(a)+'.';
+    if(b===2)return 'Times 2 is just double: '+fmt(a)+' + '+fmt(a)+'.';
+    return 'Times 3 is three lots: '+fmt(a)+' + '+fmt(a)+' + '+fmt(a)+'.'}
+  return 'Divide by 2 means halve it. What doubles to make '+fmt(a)+'?';
+}
+function fmt(n){return n<0?'−'+Math.abs(n):String(n)}
+function pretty(e){return e.replace(/([+−×÷])/g,' $1 ')}
+function stepText(s){return fmt(s.a)+' '+s.op+' '+s.b}
+
+// ---------- state ----------
+function newLane(){return {phase:'input',expr:'',entry:'',steps:[],idx:0,target:null,note:'',tries:0,hint:false,revealed:false,clean:true}}
+var S={lane:0,lanes:[newLane(),newLane(),newLane()],
+  set:{level:1,flow:false,focus:false,calm:false,big:false,easy:false,buzz:true,speak:false,breakMin:25},
+  stats:{solved:0,streak:0,best:0},focusMs:0,lastBreakMs:0};
+function L(){return S.lanes[S.lane]}
+function save(){try{localStorage.setItem('complicator.v2',JSON.stringify({lane:S.lane,lanes:S.lanes,set:S.set,stats:S.stats}))}catch(e){}}
+function load(){try{var d=JSON.parse(localStorage.getItem('complicator.v2')||'null');if(!d)return;
+  if(d.lanes&&d.lanes.length===3)S.lanes=d.lanes.map(function(l){return Object.assign(newLane(),l)});
+  if(typeof d.lane==='number')S.lane=d.lane;Object.assign(S.set,d.set||{});Object.assign(S.stats,d.stats||{});
+}catch(e){}}
+
+// ---------- feedback ----------
+function buzz(p){if(!S.set.buzz)return;try{navigator.vibrate&&navigator.vibrate(p)}catch(e){}}
+function speak(t){if(!S.set.speak)return;try{var u=new SpeechSynthesisUtterance(t);u.rate=0.95;speechSynthesis.cancel();speechSynthesis.speak(u)}catch(e){}}
+function say(t){$('live').textContent=t}
+function speakStep(){var l=L();if(l.phase!=='solve')return;var s=l.steps[l.idx];
+  speak((s.a<0?'minus '+Math.abs(s.a):s.a)+' '+SAY[s.op]+' '+s.b)}
+function sparks(){
+  if(S.set.calm)return;var m=$('main'),cols=['#F2994A','#9BD27E','#7FB2FF','#FFE3C7','#E58FB4'];
+  for(var i=0;i<18;i++){var d=document.createElement('div');d.className='spark';d.style.background=pick(cols);
+    d.style.left=(40+Math.random()*50)+'%';d.style.top='60%';d.style.setProperty('--dx',(Math.random()*240-120)+'px');d.style.setProperty('--dy',(-40-Math.random()*90)+'px');
+    m.appendChild(d);setTimeout(function(x){return function(){x.remove()}}(d),950)}
+  m.classList.remove('win');void m.offsetWidth;m.classList.add('win');
+}
+function shake(){if(S.set.calm)return;var p=$('pip');p.classList.remove('shake');void p.offsetWidth;p.classList.add('shake')}
+
+// ---------- actions ----------
+var flowTimer=null;
+function startPuzzle(l,expr){
+  var v=evaluate(expr);
+  if(v===null){l.note='Finish your sum first.';return false}
+  if(!Number.isInteger(v)){l.note='Whole-number answers only for now.';return false}
+  if(Math.abs(v)>9999){l.note='Keep it under 10,000 for now.';return false}
+  l.expr=expr;l.target=v;l.steps=generate(v,LEVELS[S.set.level].n);l.idx=0;l.entry='';l.note='';l.phase='solve';l.tries=0;l.hint=false;l.revealed=false;l.clean=true;
+  return true;
+}
+function press(k){
+  var l=L();clearTimeout(flowTimer);
+  if(l.phase==='done'){Object.assign(l,newLane());if(/[0-9]/.test(k))l.expr=k;return commit()}
+  if(l.phase==='input'){
+    if(k==='⌫'){l.expr=l.expr.slice(0,-1);l.note='';return commit()}
+    if(k==='='){if(startPuzzle(l,l.expr))speakStep();return commit()}
+    var e=l.expr;
+    if(isOp(k)){if(!e)return;if(isOp(e[e.length-1]))e=e.slice(0,-1)}
+    else if(e.replace(/.*[+−×÷]/,'').length>=4)return;
+    l.expr=e+k;l.note='';return commit();
+  }
+  if(k==='⌫'){l.entry=l.entry.slice(0,-1);if(l.entry==='-')l.entry='';return commit()}
+  if(k==='−'){l.entry=l.entry[0]==='-'?l.entry.slice(1):'-'+l.entry;return commit()}
+  if(isOp(k))return;
+  if(k==='='){
+    if(!l.entry||l.entry==='-')return;
+    var s=l.steps[l.idx];
+    if(Number(l.entry)===s.res){
+      buzz(25);l.tries=0;l.hint=false;l.entry='';
+      if(l.idx===l.steps.length-1){
+        l.phase='done';l.note='';S.stats.solved++;
+        if(l.clean){S.stats.streak++;S.stats.best=Math.max(S.stats.best,S.stats.streak)}else S.stats.streak=0;
+        buzz([30,60,30]);say('Solved. The answer is '+l.target);commit();sparks();
+        if(S.set.flow){var lane=S.lane;flowTimer=setTimeout(function(){if(S.lane===lane&&L().phase==='done')surprise()},1600)}
+        return;
+      }
+      l.idx++;l.note=pick(PRAISE)+' Next dimension.';say(l.note);commit();speakStep();return;
+    }
+    l.tries++;l.entry='';l.clean=l.clean&&false;
+    if(l.tries===1)l.note='Not quite. Have another go.';
+    else if(l.tries===2){l.hint=true;l.note=hintFor(s)}
+    else{l.revealed=true;l.note='It’s '+fmt(s.res)+'. Type it in and keep moving.'}
+    shake();say(l.note);return commit();
+  }
+  if(l.entry.replace('-','').length>=6)return;
+  l.entry+=k;l.note='';commit();
+}
+function hint(){var l=L();if(l.phase!=='solve')return;l.hint=true;l.clean=false;l.note=hintFor(l.steps[l.idx]);say(l.note);commit()}
+function newRoute(){var l=L();if(l.phase==='input'||l.target===null)return;var t=l.target,e=l.expr;startPuzzle(l,e);l.note='Same answer, different road.';commit();speakStep()}
+function surprise(){var l=L();clearTimeout(flowTimer);Object.assign(l,newLane());startPuzzle(l,surpriseSum());l.note='Fresh one. Go.';commit();speakStep()}
+function switchLane(i){clearTimeout(flowTimer);S.lane=i;commit();speakStep()}
+function commit(){save();render()}
+
+// ---------- break nudge ----------
+var brMode=null,brLeft=0,brInt=null,lastTick=Date.now();
+setInterval(function(){var now=Date.now(),dt=now-lastTick;lastTick=now;
+  if(document.hidden||brMode||dt>5000)return;S.focusMs+=dt;
+  if(S.set.breakMin>0&&S.focusMs-S.lastBreakMs>=S.set.breakMin*60000)openBreak();
+  renderStats();},1000);
+function openBreak(){brMode='ask';var m=Math.round((S.focusMs-S.lastBreakMs)/60000);
+  $('brH').textContent='You’ve been locked in for '+m+' min';
+  $('brP').textContent='That’s proper focus. Quick water or stretch, then carry on? Your puzzles will wait right here.';
+  $('brTimer').hidden=true;$('brMain').textContent='Take 5';$('brAlt').textContent='Keep going';
+  $('breakVeil').classList.add('open');$('brMain').focus()}
+function closeBreak(){brMode=null;clearInterval(brInt);S.lastBreakMs=S.focusMs;$('breakVeil').classList.remove('open')}
+$=function(id){return document.getElementById(id)};
+$('brMain').onclick=function(){
+  if(brMode==='ask'){brMode='rest';brLeft=300;$('brH').textContent='Break time';$('brP').textContent='Look away from the screen. Move about a bit.';
+    $('brTimer').hidden=false;$('brMain').textContent='I’m back';$('brAlt').textContent='Add 5 more';tick();brInt=setInterval(tick,1000)}
+  else closeBreak()};
+$('brAlt').onclick=function(){if(brMode==='ask')closeBreak();else{brLeft+=300;tick()}};
+function tick(){if(brLeft>0)brLeft--;var m=Math.floor(brLeft/60),s=brLeft%60;$('brTimer').textContent=m+':'+(s<10?'0':'')+s;
+  if(brLeft===0){$('brH').textContent='Ready when you are';$('brP').textContent='Your puzzles are right where you left them.';clearInterval(brInt);buzz([40,80,40])}}
+
+// ---------- build static ----------
+function el(tag,cls,txt){var e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e}
+var $;
+KEYS.forEach(function(k){var kind=k==='='?'eq':k==='⌫'?'del':isOp(k)?'op':'num';var b=el('button','k '+kind);b.type='button';b.setAttribute('aria-label',ARIA[k]||k);
+  if(k==='⌫')b.innerHTML='<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5h11v14H9l-6-7z"/><path d="M12.5 9.5l5 5M17.5 9.5l-5 5"/></svg>';
+  else b.textContent=k;
+  b.onclick=function(){press(k)};$('keys').appendChild(b)});
+LANE_NAMES.forEach(function(n,i){var b=el('button','lane');b.type='button';b.setAttribute('role','tab');b.setAttribute('aria-label','Puzzle '+n);b.onclick=function(){switchLane(i)};
+  b.innerHTML='<span class="ln"><span>'+n+'</span><i></i></span><span class="bar"><span></span></span>';$('lanes').appendChild(b)});
+LEVELS.forEach(function(lv,i){var b=el('button',null,lv.name);b.type='button';b.onclick=function(){S.set.level=i;commit()};$('segLevel').appendChild(b)});
+[[0,'Off'],[15,'15m'],[25,'25m'],[45,'45m']].forEach(function(o){var b=el('button',null,o[1]);b.type='button';b.dataset.v=o[0];b.onclick=function(){S.set.breakMin=o[0];S.lastBreakMs=S.focusMs;commit()};$('segBreak').appendChild(b)});
+document.querySelectorAll('.tog').forEach(function(t){t.onclick=function(){var k=t.dataset.set;S.set[k]=!S.set[k];commit();if(k==='speak'&&S.set.speak)speak('Reading steps out loud')}});
+$('aHint').onclick=hint;$('aRoute').onclick=newRoute;$('aSurprise').onclick=surprise;
+$('aFocus').onclick=function(){S.set.focus=!S.set.focus;commit()};
+$('openSettings').onclick=function(){$('settingsVeil').classList.add('open');$('closeSettings').focus()};
+$('closeSettings').onclick=function(){$('settingsVeil').classList.remove('open')};
+$('settingsVeil').onclick=function(e){if(e.target===this)this.classList.remove('open')};
+var keyMap={'/':'÷','*':'×','x':'×','-':'−','+':'+','Enter':'=','=':'=','Backspace':'⌫','Delete':'⌫'};
+document.addEventListener('keydown',function(e){
+  if($('settingsVeil').classList.contains('open')||brMode){if(e.key==='Escape'){$('settingsVeil').classList.remove('open')}return}
+  if(e.target&&e.target.tagName==='BUTTON'&&(e.key==='Enter'||e.key===' '))return;
+  var k=/^[0-9]$/.test(e.key)?e.key:keyMap[e.key];
+  if(k){e.preventDefault();press(k)}else if(e.key==='h')hint();else if(e.key==='s')surprise();else if(e.key==='Tab'&&e.shiftKey===false&&e.altKey){}
+  else if(e.key==='['||e.key===']'){e.preventDefault();switchLane((S.lane+(e.key===']'?1:2))%3)}
+});
+
+// ---------- render ----------
+function laneStatus(l){if(l.phase==='input')return l.expr?'typing':'empty';if(l.phase==='done')return 'solved';return l.idx+'/'+l.steps.length}
+function renderStats(){var m=Math.floor(S.focusMs/60000);$('stats').innerHTML='<b>'+S.stats.streak+'</b> streak · '+m+'m'}
+function render(){
+  var l=L(),n=l.phase==='input'?LEVELS[S.set.level].n:l.steps.length;
+  var app=$('app');document.body.classList.toggle('calm',S.set.calm);document.body.classList.toggle('easy',S.set.easy);document.body.classList.toggle('big',S.set.big);app.classList.toggle('focus',S.set.focus);
+  renderStats();
+  Array.prototype.forEach.call($('lanes').children,function(b,i){var x=S.lanes[i];b.classList.toggle('on',i===S.lane);b.setAttribute('aria-selected',i===S.lane);
+    b.querySelector('i').textContent=laneStatus(x);var pct=x.phase==='done'?100:x.phase==='solve'?Math.round(x.idx/x.steps.length*100):0;b.querySelector('.bar span').style.width=pct+'%'});
+  $('stackH').textContent=n+'D STACK';
+  var box=$('slabs');box.innerHTML='';
+  for(var i=0;i<n;i++){var s=l.steps[i],cls='ghost',t='D'+(i+1)+'  ?';
+    if(s){if(l.phase==='done'||i<l.idx){cls='done';t='D'+(i+1)+'  '+stepText(s)+' = '+fmt(s.res)}
+      else if(i===l.idx){cls='now';t='D'+(i+1)+'  '+(i===0?stepText(s):'… '+s.op+' '+s.b)+' = ?'}
+      else{cls='todo';t='D'+(i+1)+'  locked'}}
+    var d=el('div','slab '+cls);d.style.marginLeft=(i*3)+'px';d.appendChild(el('span',null,t));box.appendChild(d)}
+  var sum=l.expr?pretty(l.expr):'0';
+  fitStack(n);
+  if(l.phase==='input')set('PUZZLE BOX','? ? ?',l.note||'Type an easy sum and press =, or tap Surprise.','TYPE A SUM',sum);
+  else if(l.phase==='solve'){var c=l.steps[l.idx];set('DIMENSION '+(l.idx+1)+' OF '+l.steps.length,stepText(c)+' =',l.note||'Type the answer, then press =.',sum+' = ?',l.entry?l.entry.replace('-','−'):'')}
+  else set('ALL '+l.steps.length+' SOLVED','= '+fmt(l.target),S.set.flow?'Nice. Next one loading…':'Same answer, longer road. Tap Surprise or type a new sum.',sum+' =',fmt(l.target));
+  $('aHint').disabled=l.phase!=='solve';$('aRoute').disabled=l.phase==='input';
+  $('aFocus').setAttribute('aria-pressed',S.set.focus);
+  Array.prototype.forEach.call($('segLevel').children,function(b,i){b.setAttribute('aria-pressed',i===S.set.level)});
+  Array.prototype.forEach.call($('segBreak').children,function(b){b.setAttribute('aria-pressed',Number(b.dataset.v)===S.set.breakMin)});
+  document.querySelectorAll('.tog').forEach(function(t){t.setAttribute('aria-checked',!!S.set[t.dataset.set])});
+}
+function fitStack(n){
+  var sc=document.querySelector('.screens'),mn=$('main'),hd=$('stackH');if(!sc)return;
+  var avail=sc.clientHeight-mn.offsetHeight-8+18-26-(getComputedStyle(hd).display!=='none'?21:0);
+  var raw=Math.floor(avail/n)-4,h=Math.max(12,Math.min(26,raw));
+  $('app').classList.toggle('tight',raw<12&&!S.set.focus);
+  document.documentElement.style.setProperty('--slab',h+'px');
+  document.documentElement.style.setProperty('--slabf',(h<17?10:12)+'px');
+}
+window.addEventListener('resize',function(){render()});
+function set(a,b,c,d,e){$('mainD').classList.toggle('empty',e==='');$('pipT').textContent=a;$('pipM').textContent=b;$('pipN').textContent=c;$('mainL').textContent=d;$('mainD').textContent=e}
+load();render();
+</script>
+</body>
+</html>
