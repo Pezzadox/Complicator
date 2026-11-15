@@ -1,0 +1,28 @@
+A calculator that does the opposite of a calculator.
+
+Type an easy sum, like 1 + 1, and The Complicator turns it into a chain of small steps that all land on the same answer. Work through every step to unlock it.
+
+Built for neurodivergent brains: ADHD, autism, dyscalculia and more. A plain sum is boring, and boredom is where attention drops. A chain of small wins holds it.
+
+BIG AND CLEAR
+• Big chunky buttons, a big screen and high contrast
+• A puzzle box in the corner shows the step you're on
+• The dimension stack shows how far you've come: Chill is 2D, Tricky is 4D, Chaos is 8D
+
+BUILT FOR ADHD
+• Three puzzle tabs that each keep their progress, so you can jump between them
+• Flow mode loads the next puzzle by itself, with a streak counter and focus timer
+• Never stuck: a miss gets "have another go", then a hint, then the answer. No red crosses
+• New way: a different route to the same answer
+• Surprise: makes up a sum for you
+• Focus view shows only the current step
+• Break nudge after 15, 25 or 45 minutes, with a 5-minute break timer
+
+COMFORTABLE
+• Calm colours, bigger text and an easy-read font
+• A gentle buzz on correct answers
+• Steps read aloud
+
+No account, no ads, no tracking. Works offline. Your progress stays on your phone.
+
+Idea by King of Ink.

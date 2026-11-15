@@ -1,0 +1,16 @@
+# Runs on every push: the puzzle maths, a full play-through and the phone layouts,
+# plus a check that the app build (bundled fonts, haptics) still assembles.
+name: Check
+on: [push, pull_request]
+jobs:
+  web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22', cache: 'npm' }
+      - run: npm ci && npm run build
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install playwright && playwright install --with-deps chromium
+      - run: python tests/test_app.py | tee result.txt && ! grep -q '^FAIL' result.txt

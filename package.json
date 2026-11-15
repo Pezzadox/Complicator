@@ -1,0 +1,26 @@
+{
+  "name": "the-complicator",
+  "version": "1.0.0",
+  "private": true,
+  "description": "The Complicator - making maths harder, so it's easier.",
+  "scripts": {
+    "build": "node tools/build-www.js",
+    "sync": "node tools/build-www.js && cap sync",
+    "open:android": "cap open android",
+    "open:ios": "cap open ios"
+  },
+  "dependencies": {
+    "@capacitor/android": "^7.0.0",
+    "@capacitor/core": "^7.0.0",
+    "@capacitor/haptics": "^7.0.0",
+    "@capacitor/ios": "^7.0.0",
+    "@capacitor/splash-screen": "^7.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
+    "@capacitor/cli": "^7.0.0",
+    "@fontsource/atkinson-hyperlegible": "^5.0.0",
+    "@fontsource/jetbrains-mono": "^5.0.0",
+    "@fontsource/space-grotesk": "^5.0.0"
+  }
+}

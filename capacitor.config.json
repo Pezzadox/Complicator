@@ -1,0 +1,15 @@
+{
+  "appId": "com.thecomplicator.app",
+  "appName": "The Complicator",
+  "webDir": "www",
+  "android": { "allowMixedContent": false },
+  "ios": { "contentInset": "never" },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 800,
+      "launchAutoHide": true,
+      "backgroundColor": "#23262B",
+      "showSpinner": false
+    }
+  }
+}

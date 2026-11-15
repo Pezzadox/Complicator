@@ -32,6 +32,19 @@ It's one file. Open `index.html` in any browser, or host it on GitHub Pages (Set
 
 Keyboard: numbers and `+ - * /`, Enter for `=`, Backspace to delete, `h` for a hint, `s` for surprise, `[` and `]` to switch puzzles.
 
+## The phone apps
+
+The same `index.html` is wrapped for iOS and Android with Capacitor.
+
+```bash
+npm install
+npm run sync        # builds www/ (bundled fonts, phone haptics) and copies it into both apps
+```
+
+`android/` and `ios/` are the native projects, `store/` holds the listings, screenshots and
+privacy policy, and `.github/workflows/release.yml` builds and uploads to both stores on a
+version tag. See `docs/release-runbook.md`.
+
 ## Tests
 
 ```

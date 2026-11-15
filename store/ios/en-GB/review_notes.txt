@@ -1,0 +1,1 @@
+No sign-in is needed. Tap any numbers and an operator on the calculator, for example 1 + 1, then =. The app turns the sum into a chain of steps; solve each one on the keypad to reach the answer. The settings button (top right) opens comfort settings (calm colours, bigger text, easy-read font, haptics, read aloud). The app works fully offline and collects no data.

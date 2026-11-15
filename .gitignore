@@ -1,2 +1,17 @@
 .DS_Store
 __pycache__/
+node_modules/
+www/
+build/
+*.keystore
+*.jks
+*.p12
+*.p8
+*.mobileprovision
+fastlane/report.xml
+fastlane/README.md
+android/.gradle/
+android/app/build/
+android/local.properties
+ios/App/Pods/
+ios/App/build/
