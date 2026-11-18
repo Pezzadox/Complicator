@@ -26,5 +26,9 @@ if (html === before || /fonts\.googleapis/.test(html)) throw new Error('Could no
 if (!html.includes('</body>')) throw new Error('index.html has no </body>');
 html = html.replace('</body>', '<script src="native.js"></script>\n</body>');
 fs.writeFileSync(path.join(www, 'index.html'), html);
-fs.copyFileSync(path.join(root, 'native/native.js'), path.join(www, 'native.js'));
-console.log('www/ built: index.html, native.js, ' + faces.reduce((n, f) => n + f[2].length, 0) + ' fonts');
+// The banner advert only exists when a release sets ADMOB_BANNER_ID; otherwise the app has no adverts.
+const bannerId = (process.env.ADMOB_BANNER_ID || '').trim();
+if (bannerId && !/^ca-app-pub-\d+\/\d+$/.test(bannerId)) throw new Error('ADMOB_BANNER_ID does not look like an AdMob ad unit id');
+fs.writeFileSync(path.join(www, 'native.js'),
+  'window.COMPLICATOR_ADS=' + JSON.stringify({ banner: bannerId }) + ';\n' + fs.readFileSync(path.join(root, 'native/native.js'), 'utf8'));
+console.log('www/ built (' + (bannerId ? 'with' : 'without') + ' banner advert): index.html, native.js, ' + faces.reduce((n, f) => n + f[2].length, 0) + ' fonts');

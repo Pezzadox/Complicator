@@ -21,6 +21,10 @@
             </intent-filter>
         </activity>
 
+        <!-- AdMob needs an app id to start. Release builds pass the real one (see docs/release-runbook.md);
+             without it this is Google's public test id and the app shows no adverts. -->
+        <meta-data android:name="com.google.android.gms.ads.APPLICATION_ID" android:value="${admobAppId}" />
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"
@@ -33,4 +37,5 @@
     <!-- Permissions -->
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="com.google.android.gms.permission.AD_ID" />
 </manifest>

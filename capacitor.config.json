@@ -2,8 +2,16 @@
   "appId": "com.thecomplicator.app",
   "appName": "The Complicator",
   "webDir": "www",
-  "android": { "allowMixedContent": false },
-  "ios": { "contentInset": "never" },
+  "android": {
+    "allowMixedContent": false
+  },
+  "ios": {
+    "contentInset": "never",
+    "includePlugins": [
+      "@capacitor/haptics",
+      "@capacitor/splash-screen"
+    ]
+  },
   "plugins": {
     "SplashScreen": {
       "launchShowDuration": 800,

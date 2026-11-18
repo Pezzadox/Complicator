@@ -57,6 +57,8 @@ jobs:
           else echo "upload=no" >> $GITHUB_OUTPUT; echo "::notice::No Play service account yet — the bundle is kept as an artifact for a manual upload."; fi
 
       - if: steps.gate.outputs.ready == 'yes'
+        env:
+          ADMOB_BANNER_ID: ${{ secrets.ADMOB_BANNER_ID }}
         run: npm ci && npm run build && npx cap sync android
 
       - name: Unpack the signing key
@@ -70,6 +72,7 @@ jobs:
           ./gradlew bundleRelease --no-daemon \
             -PvName=${{ needs.version.outputs.name }} \
             -PvCode=${{ needs.version.outputs.code }} \
+            -PadmobAppId='${{ secrets.ADMOB_APP_ID }}' \
             -PstoreFileProp="$RUNNER_TEMP/release.keystore" \
             -PstorePasswordProp='${{ secrets.ANDROID_KEYSTORE_PASSWORD }}' \
             -PkeyAliasProp='${{ secrets.ANDROID_KEY_ALIAS }}' \
